@@ -3,11 +3,11 @@ import omit from 'lodash.omit'
 import CMeteorData from './components/MeteorData'
 import CMeteorSub from './components/MeteorSub'
 
-function defaultSubscription (...args) {
+function defaultSubscription(...args) {
   return Meteor.subscribe(...args)
 }
 
-function hasProperty (holder, key) {
+function hasProperty(holder, key) {
   return typeof holder !== 'undefined' && holder.hasOwnProperty(key)
 }
 
@@ -16,7 +16,7 @@ const noop = () => {}
 let set
 
 export default {
-  install (Vue, options) {
+  install(Vue, options) {
     const isServer = Vue.prototype.$isServer
     const vueVersion = Vue.version.substr(0, Vue.version.indexOf('.'))
 
@@ -48,7 +48,7 @@ export default {
       }, merge(toData, fromData))
     }
 
-    function getResult (result) {
+    function getResult(result) {
       if (result && typeof result.fetch === 'function') {
         result = result.fetch()
       }
@@ -58,7 +58,7 @@ export default {
       return result
     }
 
-    function firstPrepare () {
+    function firstPrepare() {
       prepare.call(this)
       Object.defineProperty(this, '$subReady', {
         get: () => this.$data.$meteor.subs,
@@ -68,13 +68,13 @@ export default {
       proxyData.call(this)
     }
 
-    function prepare () {
+    function prepare() {
       this._trackerHandles = []
       this._subsAutorun = {}
       this._subs = {}
     }
 
-    function proxyData () {
+    function proxyData() {
       const initData = this.$_meteorInitData = {}
       let meteor = this.$options.meteor
 
@@ -94,7 +94,7 @@ export default {
       }
     }
 
-    function proxyKey (key) {
+    function proxyKey(key) {
       if (hasProperty(this, key)) {
         throw Error(`Meteor data '${key}': Property already used in the component methods or prototype.`)
       }
@@ -106,7 +106,7 @@ export default {
       })
     }
 
-    function launch () {
+    function launch() {
       this._meteorActive = true
 
       let meteor = this.$options.meteor
@@ -136,7 +136,7 @@ export default {
     }
 
     Vue.mixin({
-      data () {
+      data() {
         return {
           $meteor: {
             data: this.$_meteorInitData,
@@ -153,7 +153,7 @@ export default {
         beforeCreate: firstPrepare,
       } : {},
 
-      created () {
+      created() {
         if (this.$options.meteor && !this.$options.meteor.$lazy) {
           launch.call(this)
         }
@@ -172,7 +172,7 @@ export default {
       },
 
       methods: {
-        $_subscribe (...args) {
+        $_subscribe(...args) {
           if (args.length > 0) {
             const key = args[0]
             const oldSub = this._subs[key]
@@ -204,7 +204,7 @@ export default {
           }
         },
 
-        $subscribe (key, options) {
+        $subscribe(key, options) {
           let handle, unwatch
           let subscribe = params => {
             handle = this.$_subscribe(key, ...params)
@@ -230,13 +230,13 @@ export default {
           }
         },
 
-        $autorun (reactiveFunction) {
+        $autorun(reactiveFunction) {
           let handle = Tracker.autorun(reactiveFunction)
           this._trackerHandles.push(handle)
           return handle
         },
 
-        $stopHandle (handle) {
+        $stopHandle(handle) {
           handle.stop()
           let index = this._trackerHandles.indexOf(handle)
           if (index !== -1) {
@@ -244,16 +244,16 @@ export default {
           }
         },
 
-        $startMeteor () {
+        $startMeteor() {
           if (!this._meteorActive) {
             prepare.call(this)
             launch.call(this)
           }
         },
 
-        $stopMeteor () {
+        $stopMeteor() {
           // Stop all reactivity when view is destroyed.
-          this._trackerHandles.forEach((tracker) => {
+          this._trackerHandles && this._trackerHandles.forEach((tracker) => {
             try {
               tracker.stop()
             } catch (e) {
@@ -264,7 +264,7 @@ export default {
           this._meteorActive = false
         },
 
-        $addMeteorData (key, func, proxy = false) {
+        $addMeteorData(key, func, proxy = false) {
           if (typeof func === 'function') {
             func = func.bind(this)
           } else {
@@ -309,7 +309,7 @@ export default {
           }
         },
 
-        $addComputed (key, watcher) {
+        $addComputed(key, watcher) {
           if (watcher.getter.vuex) return
           let computation, autorunMethod
           const autorun = (cb) => {
@@ -325,7 +325,7 @@ export default {
                 watcher.run()
                 watcher.get = get
                 // Notify watchers subscribed in dependencies
-                for (const dep of watcher.deps) {
+                for(const dep of watcher.deps) {
                   const subs = dep.subs.slice()
                   for (const sub of subs) {
                     if (sub.id !== watcher.id) {
